@@ -58,6 +58,11 @@ class App
         return
       end
 
+      if start_date < Date.today
+        puts 'Start date cannot be in the past.'
+        return
+      end      
+
       if @service.item_available?(item, start_date, end_date)
         rental = Models::Rental.new(item, start_date, end_date)
         @service.add_rental(rental)
