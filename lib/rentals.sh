@@ -6,14 +6,27 @@ rent_item() {
 
     echo ""
     echo "=== Rent an Item ==="
-    list_items "$items_file"
-    read -rp "Enter the item name you wish to rent: " item_name
 
-    if ! grep -Fxq "$item_name" "$items_file"; then
-        echo "Error: Item '$item_name' does not exist."
-        return
-    fi
+    mapfile -t items < "$items_file"
 
+    echo "Available Items:"
+    for i in "${!items[@]}"; do
+        printf "%d) %s\n" $((i + 1)) "${items[i]}"
+    done
+
+    local item_index
+    while true; do
+        read -rp "Enter the number of the item you wish to rent: " item_index
+        if [[ "$item_index" =~ ^[0-9]+$ ]] && (( item_index >= 1 && item_index <= ${#items[@]} )); then
+            break
+        else
+            echo "Invalid selection. Please enter a number between 1 and ${#items[@]}."
+        fi
+    done
+
+    local item_name="${items[item_index - 1]}"
+
+    local start_date
     while true; do
         read -rp "Enter the start date (YYYY-MM-DD): " start_date
         if is_valid_date "$start_date"; then
@@ -23,6 +36,7 @@ rent_item() {
         fi
     done
 
+    local end_date
     while true; do
         read -rp "Enter the end date (YYYY-MM-DD): " end_date
         if is_valid_date "$end_date"; then
@@ -55,14 +69,12 @@ is_item_available() {
     end_epoch=$(date -d "$end_date" +%s)
 
     while IFS='|' read -r rented_item rented_start rented_end; do
-        # Skip expired rentals
         if [[ "$(date -d "$rented_end" +%s)" -lt "$(date +%s)" ]]; then
             continue
         fi
         if [[ "$rented_item" == "$item" ]]; then
             rented_start_epoch=$(date -d "$rented_start" +%s)
             rented_end_epoch=$(date -d "$rented_end" +%s)
-            # Check for overlap
             if [[ $start_epoch -lt $rented_end_epoch && $end_epoch -gt $rented_start_epoch ]]; then
                 echo "Error: '$item' is already rented during this period."
                 echo "It will be available again after $rented_end."
