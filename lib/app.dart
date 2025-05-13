@@ -2,6 +2,7 @@ import 'dart:io';
 import 'models/item.dart';
 import 'models/rental.dart';
 import 'services/rental_service.dart';
+import 'package:collection/collection.dart';
 
 class App {
   final RentalService rentalService = RentalService();
@@ -50,10 +51,7 @@ class App {
     stdout.write('Enter the number of the item you wish to rent: ');
     final input = stdin.readLineSync();
     final itemId = int.tryParse(input ?? '');
-    final item = rentalService.items.firstWhere(
-      (i) => i.id == itemId,
-      orElse: () => null,
-    );
+    final item = rentalService.items.firstWhereOrNull((i) => i.id == itemId);
     if (item == null) {
       print('Invalid item selection.');
       return;
