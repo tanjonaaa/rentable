@@ -1,5 +1,4 @@
-# bin/main.rb
+#!/usr/bin/env ruby
 require_relative '../lib/app'
 
-app = App.new
-app.run
+App.new.run

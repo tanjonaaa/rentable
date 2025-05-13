@@ -1,22 +1,18 @@
 require 'date'
-require_relative 'rental_service'
+require_relative './services/rental_service'
 
 class App
   def initialize
-    @service = RentalService.new
+    @service = Services::RentalService.new
   end
 
   def run
     loop do
       display_menu
-      choice = gets.chomp
-      case choice
-      when '1'
-        list_items
-      when '2'
-        rent_item
-      when '3'
-        list_rentals
+      case gets.chomp
+      when '1' then list_items
+      when '2' then rent_item
+      when '3' then list_rentals
       when '4'
         puts 'Exiting the application. Goodbye!'
         break
@@ -47,10 +43,7 @@ class App
     print 'Enter the number of the item you wish to rent: '
     item_id = gets.chomp.to_i
     item = @service.find_item_by_id(item_id)
-    unless item
-      puts 'Invalid item selection.'
-      return
-    end
+    return puts 'Invalid item selection.' unless item
 
     print 'Enter the start date (YYYY-MM-DD): '
     start_input = gets.chomp
@@ -60,14 +53,13 @@ class App
     begin
       start_date = Date.parse(start_input)
       end_date = Date.parse(end_input)
-
       if (end_date - start_date).to_i < 1
         puts 'Rental period must be at least one day.'
         return
       end
 
       if @service.item_available?(item, start_date, end_date)
-        rental = Rental.new(item, start_date, end_date)
+        rental = Models::Rental.new(item, start_date, end_date)
         @service.add_rental(rental)
         puts "Success: #{item.name} has been rented from #{start_date} to #{end_date}."
       else
