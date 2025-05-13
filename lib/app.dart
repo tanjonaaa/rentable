@@ -66,6 +66,11 @@ class App {
       final startDate = DateTime.parse(startInput!);
       final endDate = DateTime.parse(endInput!);
 
+      if (startDate.isBefore(DateTime.now())) {
+        print('Start date cannot be in the past.');
+        return;
+      }
+
       if (endDate.difference(startDate).inDays < 1) {
         print('Rental period must be at least one day.');
         return;
